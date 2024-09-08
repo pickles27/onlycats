@@ -7,7 +7,7 @@ export interface PostProps {
 export const Post = ({ imageUrl }: PostProps) => (
   <img
     alt="A picture of a cat"
-    className="w-full aspect-square object-cover overflow-clip"
+    className="w-full aspect-square object-cover overflow-clip rounded-md"
     src={imageUrl}
   />
 );
