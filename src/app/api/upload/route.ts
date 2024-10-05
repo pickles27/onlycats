@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Storage } from "@google-cloud/storage";
+import { sql } from "@vercel/postgres";
 
 const storage = new Storage({
   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
@@ -117,6 +118,14 @@ export async function POST(req: Request) {
     });
 
     const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+    const createdAt = new Date().toISOString();
+    const likes = 0;
+
+    await sql`
+      INSERT INTO Post (created_at, image_url, likes)
+      VALUES (${createdAt}, ${publicUrl}, ${likes});
+    `;
+
     return NextResponse.json({ fileUrl: publicUrl });
   } catch (error) {
     return NextResponse.json(
