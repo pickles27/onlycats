@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Storage } from "@google-cloud/storage";
 import { sql } from "@vercel/postgres";
+import { randomUUID } from "crypto";
 
 const storage = new Storage({
   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
@@ -97,7 +98,7 @@ export async function POST(req: Request) {
 
     const imageFile = parsedData.image as ParsedFile;
 
-    const blob = bucket.file(`cats/${imageFile.filename}`);
+    const blob = bucket.file(`cats/${randomUUID()}`);
     const blobStream = blob.createWriteStream({
       resumable: false,
       metadata: {
