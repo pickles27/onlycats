@@ -17,6 +17,7 @@ export const UploadButton = () => {
     }
 
     setIsUploading(true);
+
     const formData = new FormData();
     formData.append("image", file);
 
@@ -29,12 +30,12 @@ export const UploadButton = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(`Response not ok. Message: ${result.message}`);
+        throw new Error(result.message);
       }
 
       toast.success("Cat uploaded successfully!");
     } catch (error) {
-      toast.error("Cat failed to upload.");
+      toast.error("Failed to upload.");
     } finally {
       e.target.value = "";
       setIsUploading(false);
