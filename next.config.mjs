@@ -4,7 +4,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "preview.redd.it",
+        hostname: "storage.googleapis.com",
       },
     ],
   },
