@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       VALUES (${createdAt}, ${publicUrl}, ${likes});
     `;
 
-    return NextResponse.json({ fileUrl: publicUrl });
+    return NextResponse.json({ fileUrl: publicUrl }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       { message: "Error handling upload: " + (error as Error).message },
