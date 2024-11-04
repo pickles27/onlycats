@@ -16,7 +16,7 @@ export const Posts = async () => {
   const posts = await response.json();
 
   return (
-    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 space-between">
+    <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 space-between">
       {posts.map((post: any) => (
         <Image
           key={post.post_id}
