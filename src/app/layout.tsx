@@ -24,7 +24,6 @@ export default function RootLayout({
         <Toaster />
       </body>
       <Analytics />
-      <SpeedInsights />
     </html>
   );
 }
