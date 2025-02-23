@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@huggingface/inference':
+    specifier: ^3.3.6
+    version: 3.3.6
   '@vercel/analytics':
     specifier: ^1.3.1
     version: 1.3.1(next@14.2.5)(react@18.3.1)
@@ -138,6 +141,17 @@ packages:
       - encoding
       - supports-color
     dev: true
+
+  /@huggingface/inference@3.3.6:
+    resolution: {integrity: sha512-KmjUbIiqPEysIEvSJKD2Uw0B+xBbs93Gfq0tTXDOL+7NJW7MBaromk01Mu7ZHzGLxVe/KI3WLcMYPB06nozb3w==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@huggingface/tasks': 0.16.0
+    dev: false
+
+  /@huggingface/tasks@0.16.0:
+    resolution: {integrity: sha512-aHTxLYJ+aT2QEeZeVMmvtBPtZ9vOnAZRZwN5ZUPHwamzsb6FLcmj45vsB1i5guCvR9TgqBewKazfaO9j3vYmXQ==}
+    dev: false
 
   /@humanwhocodes/config-array@0.11.14:
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
