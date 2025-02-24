@@ -3,13 +3,12 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import { LoadingSpinner } from "./LoadingSpinner";
+import { revalidatePath } from "next/cache";
+import toast from "react-hot-toast";
 
 export const UploadButton = () => {
   const [isUploading, setIsUploading] = useState(false);
-  const router = useRouter();
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,7 +36,7 @@ export const UploadButton = () => {
       }
 
       toast.success("Cat uploaded successfully!");
-      router.refresh();
+      revalidatePath("/posts");
     } catch (error) {
       toast.error((error as Error).message);
     } finally {
