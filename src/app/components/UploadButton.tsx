@@ -4,7 +4,6 @@
 
 import { ChangeEvent, useState } from "react";
 import { LoadingSpinner } from "./LoadingSpinner";
-import { revalidatePath } from "next/cache";
 import toast from "react-hot-toast";
 
 export const UploadButton = () => {
@@ -36,7 +35,6 @@ export const UploadButton = () => {
       }
 
       toast.success("Cat uploaded successfully!");
-      revalidatePath("/posts");
     } catch (error) {
       toast.error((error as Error).message);
     } finally {
