@@ -5,9 +5,11 @@
 import { ChangeEvent, useState } from "react";
 import { LoadingSpinner } from "./LoadingSpinner";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 export const UploadButton = () => {
   const [isUploading, setIsUploading] = useState(false);
+  const router = useRouter();
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -40,6 +42,7 @@ export const UploadButton = () => {
     } finally {
       e.target.value = "";
       setIsUploading(false);
+      router.refresh();
     }
   };
 
