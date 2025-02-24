@@ -1,12 +1,14 @@
 import Image from "next/image";
 
 export const Posts = async () => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts`);
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts`, {
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     return (
       <div className="w-full h-full justify-center items-center">
-        Failed to fetch cats.
+        <p role="alert">Failed to load cats.</p>
       </div>
     );
   }

@@ -28,6 +28,25 @@ export async function POST(request: Request) {
       );
     }
 
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const validationResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/validate`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: buffer,
+      }
+    );
+    const validationResult = await validationResponse.json();
+    if (!validationResponse.ok) {
+      return NextResponse.json(
+        { error: validationResult.error || "Image validation failed" },
+        { status: 400 }
+      );
+    }
+
     const blob = bucket.file(`cats/${randomUUID()}`);
     const blobStream = blob.createWriteStream({
       resumable: false,
@@ -35,7 +54,6 @@ export async function POST(request: Request) {
         contentType: file.type,
       },
     });
-    const buffer = Buffer.from(await file.arrayBuffer());
 
     await new Promise<void>((resolve, reject) => {
       blobStream.on("error", (error) => reject(error));
