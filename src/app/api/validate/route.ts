@@ -44,10 +44,8 @@ async function getIsCat(imageBuffer: Buffer): Promise<boolean> {
 
   console.log("results from image classification: ", results);
 
-  const catResult = results.find(
-    (result) =>
-      result.label.toLowerCase().split(" ").includes("cat") &&
-      result.score > 0.1
+  const catResult = results.find((result) =>
+    result.label.toLowerCase().split(" ").includes("cat")
   );
   return catResult !== undefined;
 }
