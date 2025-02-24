@@ -42,7 +42,7 @@ async function getIsCat(imageBuffer: Buffer): Promise<boolean> {
     data: imageBuffer,
   });
 
-  console.log("results from getIsCat image classification: ", results);
+  console.log("results from image classification: ", results);
 
   const catResult = results.find(
     (result) =>
@@ -57,7 +57,7 @@ async function getIsFlagged(imageBuffer: Buffer): Promise<boolean> {
     data: imageBuffer,
   });
 
-  console.log("results from getIsFlagged image classification: ", results);
+  console.log("results from image moderation: ", results);
 
   const nsfwScore = results[1].score;
   return nsfwScore > 0.1;
