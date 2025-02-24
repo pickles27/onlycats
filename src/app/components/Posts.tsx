@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const Posts = async () => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts`, {
