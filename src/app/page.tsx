@@ -2,6 +2,8 @@
 import { Posts } from "./components/Posts";
 import { UploadButton } from "./components/UploadButton";
 
+export const revalidate = 0;
+
 const Home = async () => {
   return (
     <main className="flex min-h-screen flex-col items-center px-8 sm:px-12 lg:px-16 pt-8">

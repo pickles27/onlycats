@@ -4,6 +4,8 @@ import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
+export const revalidate = 0;
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
