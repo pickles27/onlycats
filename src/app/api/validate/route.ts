@@ -1,34 +1,9 @@
 import { NextResponse } from "next/server";
 import { HfInference } from "@huggingface/inference";
 
+export const maxDuration = 20;
+
 const huggingface = new HfInference(process.env.HUGGINGFACE_API_KEY as string);
-
-async function getIsCat(imageBuffer: Buffer): Promise<boolean> {
-  const results = await huggingface.imageClassification({
-    model: "google/vit-base-patch16-224",
-    data: imageBuffer,
-  });
-
-  console.log("results from getIsCat image classification: ", results);
-
-  const catResult = results.find(
-    (result) =>
-      result.label.toLowerCase().includes("cat") && result.score > 0.25
-  );
-  return catResult !== undefined;
-}
-
-async function getIsFlagged(imageBuffer: Buffer): Promise<boolean> {
-  const results = await huggingface.imageClassification({
-    model: "Falconsai/nsfw_image_detection",
-    data: imageBuffer,
-  });
-
-  console.log("results from getIsFlagged image classification: ", results);
-
-  const nsfwScore = results[1].score;
-  return nsfwScore > 0.1;
-}
 
 export async function POST(request: Request) {
   try {
@@ -59,4 +34,31 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+async function getIsCat(imageBuffer: Buffer): Promise<boolean> {
+  const results = await huggingface.imageClassification({
+    model: "google/vit-base-patch16-224",
+    data: imageBuffer,
+  });
+
+  console.log("results from getIsCat image classification: ", results);
+
+  const catResult = results.find(
+    (result) =>
+      result.label.toLowerCase().includes("cat") && result.score > 0.15
+  );
+  return catResult !== undefined;
+}
+
+async function getIsFlagged(imageBuffer: Buffer): Promise<boolean> {
+  const results = await huggingface.imageClassification({
+    model: "Falconsai/nsfw_image_detection",
+    data: imageBuffer,
+  });
+
+  console.log("results from getIsFlagged image classification: ", results);
+
+  const nsfwScore = results[1].score;
+  return nsfwScore > 0.1;
 }
