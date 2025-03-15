@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const isFlagged = await getIsFlagged(dataUrl);
     if (isFlagged) {
       return NextResponse.json(
-        { error: "Image flagged by automod." },
+        { error: "Image flagged by automod 👿" },
         { status: 400 }
       );
     }
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const isCat = await getIsCat(dataUrl);
     if (!isCat) {
       return NextResponse.json(
-        { error: "That doesn't look like a cat!" },
+        { error: "That doesn't look like a cat! 🤨" },
         { status: 400 }
       );
     }
@@ -39,47 +39,55 @@ export async function POST(request: Request) {
 }
 
 async function getIsCat(dataUrl: string): Promise<boolean> {
-  const response = await openai.responses.create({
-    model: "gpt-4o-mini",
-    input: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "input_text",
-            text: 'Is there a cat in this image? If so, respond "yes", otherwise respond "no".',
-          },
-          {
-            type: "input_image",
-            image_url: dataUrl,
-            detail: "low",
-          },
-        ],
-      },
-    ],
-  });
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-4o-mini",
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: 'Is there a cat in this image? If so, respond "yes", otherwise respond "no".',
+            },
+            {
+              type: "input_image",
+              image_url: dataUrl,
+              detail: "low",
+            },
+          ],
+        },
+      ],
+    });
 
-  console.log("response from image classification: ", response);
-
-  return response.output_text.toLowerCase().includes("yes");
+    console.log("response from image classification: ", response);
+    return response.output_text.toLowerCase().includes("yes");
+  } catch (error) {
+    console.error("error during image classification: ", error);
+    throw new Error("Encountered an issue during cat detection 😾");
+  }
 }
 
 async function getIsFlagged(dataUrl: string): Promise<boolean> {
-  const response = await openai.moderations.create({
-    model: "omni-moderation-latest",
-    input: [
-      {
-        type: "image_url",
-        image_url: {
-          url: dataUrl,
+  try {
+    const response = await openai.moderations.create({
+      model: "omni-moderation-latest",
+      input: [
+        {
+          type: "image_url",
+          image_url: {
+            url: dataUrl,
+          },
         },
-      },
-    ],
-  });
+      ],
+    });
 
-  console.log("results from image moderation openai: ", response.results);
-
-  return response.results[0].flagged;
+    console.log("results from image moderation openai: ", response.results);
+    return response.results[0].flagged;
+  } catch (error) {
+    console.error("error during image moderation: ", error);
+    throw new Error("Encountered an issue during image moderation 😾");
+  }
 }
 
 async function getDataUrlByArrayBuffer(arrayBuffer: ArrayBuffer) {
