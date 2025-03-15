@@ -1,27 +1,29 @@
 import { NextResponse } from "next/server";
-import { HfInference } from "@huggingface/inference";
+import { fileTypeFromBuffer } from "file-type";
+import OpenAI from "openai";
 
+// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
 export const maxDuration = 20;
 
-const huggingface = new HfInference(process.env.HUGGINGFACE_API_KEY as string);
+const openai = new OpenAI();
 
 export async function POST(request: Request) {
   try {
     const arrayBuffer = await request.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const dataUrl = await getDataUrlByArrayBuffer(arrayBuffer);
 
-    const isFlagged = await getIsFlagged(buffer);
+    const isFlagged = await getIsFlagged(dataUrl);
     if (isFlagged) {
       return NextResponse.json(
-        { error: "Image flagged as inappropriate" },
+        { error: "Image flagged by automod." },
         { status: 400 }
       );
     }
 
-    const isCat = await getIsCat(buffer);
+    const isCat = await getIsCat(dataUrl);
     if (!isCat) {
       return NextResponse.json(
-        { error: "Uploaded image is not a cat" },
+        { error: "That doesn't look like a cat!" },
         { status: 400 }
       );
     }
@@ -36,28 +38,55 @@ export async function POST(request: Request) {
   }
 }
 
-async function getIsCat(imageBuffer: Buffer): Promise<boolean> {
-  const results = await huggingface.imageClassification({
-    model: "google/vit-base-patch16-224",
-    data: imageBuffer,
+async function getIsCat(dataUrl: string): Promise<boolean> {
+  const response = await openai.responses.create({
+    model: "gpt-4o-mini",
+    input: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text: 'Is there a cat in this image? If so, respond "yes", otherwise respond "no".',
+          },
+          {
+            type: "input_image",
+            image_url: dataUrl,
+            detail: "low",
+          },
+        ],
+      },
+    ],
   });
 
-  console.log("results from image classification: ", results);
+  console.log("response from image classification: ", response);
 
-  const catResult = results.find((result) =>
-    result.label.toLowerCase().split(" ").includes("cat")
-  );
-  return catResult !== undefined;
+  return response.output_text.toLowerCase().includes("yes");
 }
 
-async function getIsFlagged(imageBuffer: Buffer): Promise<boolean> {
-  const results = await huggingface.imageClassification({
-    model: "Falconsai/nsfw_image_detection",
-    data: imageBuffer,
+async function getIsFlagged(dataUrl: string): Promise<boolean> {
+  const response = await openai.moderations.create({
+    model: "omni-moderation-latest",
+    input: [
+      {
+        type: "image_url",
+        image_url: {
+          url: dataUrl,
+        },
+      },
+    ],
   });
 
-  console.log("results from image moderation: ", results);
+  console.log("results from image moderation openai: ", response.results);
 
-  const nsfwScore = results[1].score;
-  return nsfwScore > 0.1;
+  return response.results[0].flagged;
+}
+
+async function getDataUrlByArrayBuffer(arrayBuffer: ArrayBuffer) {
+  const buffer = Buffer.from(arrayBuffer);
+  const base64Image = buffer.toString("base64");
+  const result = await fileTypeFromBuffer(buffer);
+  const mimeType = result?.mime;
+
+  return `data:${mimeType};base64,${base64Image}`;
 }
