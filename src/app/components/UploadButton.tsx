@@ -14,9 +14,13 @@ export const UploadButton = () => {
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
-    if (!file) {
+    if (!e.target.files || !file) {
       toast.error("Please select a file to upload.");
       return;
+    }
+
+    if (e.target.files.length > 1) {
+      toast.error("Please upload one cat at a time.");
     }
 
     setIsUploading(true);
