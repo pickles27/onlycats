@@ -60,7 +60,7 @@ async function getIsCat(dataUrl: string): Promise<boolean> {
       ],
     });
 
-    console.log("response from image classification: ", response);
+    console.log("response from image classification: ", response.output_text);
     return response.output_text.toLowerCase().includes("yes");
   } catch (error) {
     console.error("error during image classification: ", error);

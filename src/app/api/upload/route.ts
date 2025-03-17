@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { Storage } from "@google-cloud/storage";
 import { sql } from "@vercel/postgres";
 import { randomUUID } from "crypto";
-import { revalidatePath } from "next/cache";
 
 export const maxDuration = 30;
 
@@ -72,8 +71,6 @@ export async function POST(request: Request) {
       INSERT INTO Post (created_at, image_url, likes)
       VALUES (${createdAt}, ${publicUrl}, ${likes});
     `;
-
-    revalidatePath("/");
 
     return NextResponse.json({ fileUrl: publicUrl }, { status: 200 });
   } catch (error) {

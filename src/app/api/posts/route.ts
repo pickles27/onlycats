@@ -1,12 +1,10 @@
 import { sql } from "@vercel/postgres";
 import { NextResponse } from "next/server";
 
-export const revalidate = 0;
-
 export async function GET() {
   try {
     const result = await sql`
-      SELECT post_id, image_url, created_at
+      SELECT post_id, image_url, created_at, likes
       FROM Post
       ORDER BY created_at DESC
       LIMIT 100;
