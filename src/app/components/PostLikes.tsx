@@ -60,7 +60,7 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
     } catch (error) {
       console.error("error occurred while accessing local storage: ", error);
     }
-  }, []);
+  }, [localStorageKey]);
 
   return (
     <div className="absolute bottom-2 right-2 flex items-center gap-2">
