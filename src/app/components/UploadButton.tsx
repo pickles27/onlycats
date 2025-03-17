@@ -15,12 +15,12 @@ export const UploadButton = () => {
     const file = e.target.files?.[0];
 
     if (!e.target.files || !file) {
-      toast.error("Please select a file to upload.");
+      toast.error("Please select a file to upload 😾");
       return;
     }
 
     if (e.target.files.length > 1) {
-      toast.error("Please upload one cat at a time.");
+      toast.error("Please upload one cat at a time 🙀");
     }
 
     setIsUploading(true);
@@ -40,7 +40,7 @@ export const UploadButton = () => {
         throw new Error(result.error);
       }
 
-      toast.success("Cat uploaded successfully!");
+      toast.success("Cat uploaded successfully! 😸");
       router.refresh();
     } catch (error) {
       toast.error((error as Error).message);
