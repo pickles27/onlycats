@@ -9,7 +9,7 @@ interface PostProps {
 
 export const Post = ({ postId, imageUrl, likes }: PostProps) => {
   return (
-    <div className="relative" key={postId}>
+    <div className="relative">
       <Image
         alt="A picture of a cat"
         className="w-full aspect-square object-cover overflow-clip rounded-md"
