@@ -64,7 +64,11 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
 
   return (
     <div className="absolute bottom-2 right-2 flex items-center gap-2">
-      <NumberFlow className="text-white text-xl opacity-90" value={likes} />
+      <NumberFlow
+        className="text-white text-xl opacity-90"
+        format={{ notation: "compact" }}
+        value={likes}
+      />
       <button className="w-12 h-12" onClick={handleClick} aria-label="like">
         <svg
           fill={isLiked ? "pink" : "none"}
