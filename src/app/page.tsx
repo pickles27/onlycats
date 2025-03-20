@@ -7,7 +7,7 @@ const Home = async () => {
   return (
     <main className="flex min-h-screen flex-col items-center px-8 sm:px-12 lg:px-16 pt-8">
       <div className="w-full flex justify-between items-center gap-2 mb-6">
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
           <Image alt="cat icon" src={catIcon} />
           <h1 className="text-sky-600 text-3xl font-bold drop-shadow-sm">
             OnlyCats
