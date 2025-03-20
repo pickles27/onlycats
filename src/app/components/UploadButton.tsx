@@ -6,6 +6,7 @@ import { ChangeEvent, useState } from "react";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import FileUploadRoundedIcon from "@mui/icons-material/FileUploadRounded";
 
 export const UploadButton = () => {
   const [isUploading, setIsUploading] = useState(false);
@@ -54,14 +55,14 @@ export const UploadButton = () => {
     <form>
       <label
         htmlFor="file-upload"
-        className="w-28 h-10 flex justify-center items-center gap-1 bg-sky-500/10 hover:bg-sky-500/40 rounded-md py-1 px-3 cursor-pointer"
+        className="flex justify-center items-center gap-1 bg-sky-600 transition delay-75 hover:bg-sky-500 text-white font-bold rounded-full sm:rounded-lg py-2 px-2 sm:px-3 cursor-pointer drop-shadow-md"
       >
         {isUploading ? (
           <LoadingSpinner />
         ) : (
           <div className="flex items-center gap-1">
-            Upload
-            <img alt="Upload icon" className="w-8" src="../upload.png" />
+            <span className="sr-only sm:not-sr-only">Upload</span>
+            <FileUploadRoundedIcon />
           </div>
         )}
       </label>
