@@ -72,7 +72,7 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
       <button className="w-6 h-6" onClick={handleClick} aria-label="like">
         <svg
           fill={isLiked ? "pink" : "none"}
-          stroke="rgba(255,255,255,0.5)"
+          stroke="rgba(255,255,255,0.9)"
           strokeWidth={2}
           viewBox="0 0 24 24"
           className={clsx("w-6 h-6 cursor-pointer opacity-80", {
