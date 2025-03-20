@@ -55,7 +55,7 @@ export const UploadButton = () => {
     <form>
       <label
         htmlFor="file-upload"
-        className="flex justify-center items-center gap-1 bg-sky-600 transition delay-75 hover:bg-sky-500 text-white font-bold rounded-full sm:rounded-lg py-2 px-2 sm:px-3 cursor-pointer drop-shadow-md"
+        className="sm:w-28 flex justify-center items-center gap-1 bg-sky-600 transition delay-75 hover:bg-sky-500 text-white font-bold rounded-full sm:rounded-lg py-2 px-2 sm:px-3 cursor-pointer drop-shadow-md"
       >
         {isUploading ? (
           <LoadingSpinner />
