@@ -63,19 +63,19 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
   }, [localStorageKey]);
 
   return (
-    <div className="absolute bottom-2 right-2 flex items-center gap-2">
+    <div className="absolute bottom-3 right-3 flex items-center gap-2">
       <NumberFlow
         className="text-white text-xl opacity-90"
         format={{ notation: "compact" }}
         value={likes}
       />
-      <button className="w-12 h-12" onClick={handleClick} aria-label="like">
+      <button className="w-6 h-6" onClick={handleClick} aria-label="like">
         <svg
           fill={isLiked ? "pink" : "none"}
           stroke="rgba(255,255,255,0.5)"
           strokeWidth={2}
           viewBox="0 0 24 24"
-          className={clsx("w-12 h-12 cursor-pointer opacity-80", {
+          className={clsx("w-6 h-6 cursor-pointer opacity-80", {
             "animate-like": animate,
           })}
           xmlns="http://www.w3.org/2000/svg"
