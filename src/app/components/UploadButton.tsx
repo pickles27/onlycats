@@ -72,6 +72,7 @@ export const UploadButton = () => {
         onChange={handleFileChange}
         type="file"
         className="hidden"
+        disabled={isUploading}
       />
     </form>
   );
