@@ -35,10 +35,8 @@ export const UploadButton = () => {
         body: formData,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.error);
+        throw new Error("Encountered an issue while uploading 🙀");
       }
 
       toast.success("Cat uploaded successfully! 😸");
