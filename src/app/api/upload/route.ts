@@ -68,8 +68,8 @@ export async function POST(request: Request) {
     const likes = 0;
 
     await sql`
-      INSERT INTO Post (created_at, image_url, likes)
-      VALUES (${createdAt}, ${publicUrl}, ${likes});
+      INSERT INTO Post (created_at, image_url, likes, caption)
+      VALUES (${createdAt}, ${publicUrl}, ${likes}, ${validationResult.caption});
     `;
 
     return NextResponse.json({ fileUrl: publicUrl }, { status: 200 });

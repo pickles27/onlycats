@@ -22,9 +22,10 @@ export const Posts = async () => {
       {posts.map((post: any) => (
         <div key={post.post_id}>
           <Post
-            postId={post.post_id}
+            caption={post.caption}
             imageUrl={post.image_url}
             likes={post.likes}
+            postId={post.post_id}
           />
         </div>
       ))}

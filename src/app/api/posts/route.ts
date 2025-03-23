@@ -6,10 +6,9 @@ export const revalidate = 0;
 export async function GET() {
   try {
     const result = await sql`
-      SELECT post_id, image_url, created_at, likes
+      SELECT post_id, image_url, created_at, likes, caption
       FROM Post
-      ORDER BY created_at DESC
-      LIMIT 100;
+      ORDER BY created_at DESC;
     `;
 
     return NextResponse.json(result.rows);

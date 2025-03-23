@@ -63,7 +63,7 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
   }, [localStorageKey]);
 
   return (
-    <div className="absolute bottom-3 right-3 flex items-center gap-2">
+    <div className="absolute bottom-2 right-2 flex items-center gap-2">
       <NumberFlow
         className="text-white text-xl opacity-90"
         format={{ notation: "compact" }}
