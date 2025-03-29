@@ -2,17 +2,16 @@
 
 import useSWRInfinite from "swr/infinite";
 
-const LIMIT = 10;
+// Using 18 because it's divisible by 1, 2, and 3
+// Then there are no gaps on last row
+const LIMIT = 18;
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
-
   if (!res.ok) {
     throw new Error("An error occurred while fetching cats 😿");
   }
-
   const data = await res.json();
-
   return data;
 };
 

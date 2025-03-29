@@ -20,10 +20,8 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
 
   const handleClick = async () => {
     try {
-      // Reset any ongoing animation so the user can trigger a new one.
       setAnimate(false);
-      // Re-trigger the animation on next tick.
-      setTimeout(() => setAnimate(true), 10);
+      setTimeout(() => setAnimate(true));
       const response = await fetch("/api/like/post", {
         method: "POST",
         body: JSON.stringify({ postId }),
