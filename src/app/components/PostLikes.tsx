@@ -15,11 +15,13 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
   const [animate, setAnimate] = useState(false);
   const [isLiked, setIsLiked] = useState<boolean | undefined>(undefined);
   const { mutate } = useInfinitePosts();
+  const [likeCount, setLikeCount] = useState(likes);
 
   const localStorageKey = `isLiked-${postId}`;
 
   const handleClick = async () => {
     try {
+      setLikeCount((likes) => likes + 1);
       setAnimate(false);
       setTimeout(() => setAnimate(true));
       const response = await fetch("/api/like/post", {
@@ -64,7 +66,7 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
       <NumberFlow
         className="text-white text-xl opacity-90"
         format={{ notation: "compact" }}
-        value={likes}
+        value={likeCount}
       />
       <button className="w-6 h-6" onClick={handleClick} aria-label="like">
         <svg
