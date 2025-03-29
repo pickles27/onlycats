@@ -2,12 +2,12 @@
 
 import { ChangeEvent, useState } from "react";
 import { LoadingSpinner } from "./LoadingSpinner";
-import toast from "react-hot-toast";
+import { useInfinitePosts } from "../hooks/useInfinitePosts";
 import FileUploadRoundedIcon from "@mui/icons-material/FileUploadRounded";
-import { usePosts } from "../hooks/usePosts";
+import toast from "react-hot-toast";
 
 export const UploadButton = () => {
-  const { mutate } = usePosts();
+  const { mutate } = useInfinitePosts();
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {

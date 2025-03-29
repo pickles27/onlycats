@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { useState, useEffect } from "react";
 import NumberFlow from "@number-flow/react";
 import toast from "react-hot-toast";
-import { usePosts } from "../hooks/usePosts";
+import { useInfinitePosts } from "../hooks/useInfinitePosts";
 
 export interface PostLikesProps {
   postId: string;
@@ -14,7 +14,7 @@ export interface PostLikesProps {
 export const PostLikes = ({ postId, likes }: PostLikesProps) => {
   const [animate, setAnimate] = useState(false);
   const [isLiked, setIsLiked] = useState<boolean | undefined>(undefined);
-  const { mutate } = usePosts();
+  const { mutate } = useInfinitePosts();
 
   const localStorageKey = `isLiked-${postId}`;
 
@@ -44,7 +44,6 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     if (animate) {
-      // Remove the animation class after 2 seconds.
       timeout = setTimeout(() => setAnimate(false), 1000);
     }
     return () => clearTimeout(timeout);
