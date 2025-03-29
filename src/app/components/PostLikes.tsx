@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { useState, useEffect } from "react";
 import NumberFlow from "@number-flow/react";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { usePosts } from "../hooks/usePosts";
 
 export interface PostLikesProps {
   postId: string;
@@ -14,7 +14,7 @@ export interface PostLikesProps {
 export const PostLikes = ({ postId, likes }: PostLikesProps) => {
   const [animate, setAnimate] = useState(false);
   const [isLiked, setIsLiked] = useState<boolean | undefined>(undefined);
-  const router = useRouter();
+  const { mutate } = usePosts();
 
   const localStorageKey = `isLiked-${postId}`;
 
@@ -35,7 +35,7 @@ export const PostLikes = ({ postId, likes }: PostLikesProps) => {
 
       localStorage.setItem(localStorageKey, "true");
       setIsLiked(true);
-      router.refresh();
+      mutate();
     } catch (error) {
       toast.error("Unable to like post right now 😿");
     }
