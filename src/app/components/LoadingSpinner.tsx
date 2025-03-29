@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export const LoadingSpinner = () => (
   <svg
     className="animate-spin h-5 w-5 text-white"
@@ -19,4 +21,16 @@ export const LoadingSpinner = () => (
       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
     ></path>
   </svg>
+);
+
+export const LoadingSpinnerCat = () => (
+  <div className="w-full min-h-screen flex items-center justify-center">
+    <Image
+      src="/cat.svg"
+      alt="Loading..."
+      className="animate-spin"
+      width={200}
+      height={200}
+    />
+  </div>
 );

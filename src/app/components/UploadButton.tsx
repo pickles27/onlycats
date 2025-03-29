@@ -1,16 +1,14 @@
-/* eslint-disable @next/next/no-img-element */
-
 "use client";
 
 import { ChangeEvent, useState } from "react";
 import { LoadingSpinner } from "./LoadingSpinner";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import FileUploadRoundedIcon from "@mui/icons-material/FileUploadRounded";
+import { usePosts } from "../hooks/usePosts";
 
 export const UploadButton = () => {
+  const { mutate } = usePosts();
   const [isUploading, setIsUploading] = useState(false);
-  const router = useRouter();
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -40,7 +38,7 @@ export const UploadButton = () => {
       }
 
       toast.success("Cat uploaded successfully! 😸");
-      router.refresh();
+      mutate();
     } catch (error) {
       toast.error((error as Error).message);
     } finally {
