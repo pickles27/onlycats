@@ -21,11 +21,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={clsx(inter.className, "px-4 sm:px-12 lg:px-16 pt-4 sm:pt-8")}
-      >
+      <body className={inter.className}>
         <Header />
-        {children}
+        <div className="px-4 sm:px-12 lg:px-16 pt-14">{children}</div>
         <Toaster />
         <Footer />
       </body>

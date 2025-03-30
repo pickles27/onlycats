@@ -3,7 +3,7 @@ import catIcon from "public/cat.svg";
 import Image from "next/image";
 
 export const Header = () => (
-  <div className="w-full flex justify-between items-center gap-2 mb-4 sm:mb-6">
+  <div className="fixed top-0 z-50 bg-white w-full flex justify-between items-center gap-2 py-2 px-4s sm:px-12 lg:px-16">
     <div className="flex items-center gap-1">
       <Image alt="cat icon" src={catIcon} />
       <h1 className="text-sky-600 text-3xl font-bold drop-shadow-sm">
