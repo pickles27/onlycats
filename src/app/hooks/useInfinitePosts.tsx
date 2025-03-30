@@ -26,22 +26,29 @@ const getKey = (pageIndex: number, previousPageData: any) => {
 };
 
 export function useInfinitePosts() {
-  const { data, error, size, setSize, mutate, isLoading } = useSWRInfinite(
-    getKey,
-    fetcher,
-    {
+  const { data, error, size, setSize, mutate, isValidating, isLoading } =
+    useSWRInfinite(getKey, fetcher, {
       initialSize: 1,
       revalidateAll: false,
-    }
-  );
+    });
 
-  const posts = data ? data.flat() : [];
+  const posts = data
+    ? data.flat().map((post) => ({
+        blurDataUrl: post.blur_data_url,
+        caption: post.caption,
+        createdAt: post.created_at,
+        imageUrl: post.image_url,
+        likes: post.likes,
+        postId: post.post_id,
+      }))
+    : [];
   const isReachingEnd = data && data[data.length - 1]?.length < LIMIT;
 
   return {
     posts,
     errorMessage: error?.message,
     isLoading,
+    isValidating,
     size,
     setSize,
     mutate,

@@ -1,14 +1,45 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useInfinitePosts } from "../hooks/useInfinitePosts";
 import { PostSkeleton } from "./PostSkeleton";
+import { LoadingDots } from "./LoadingDots";
 import { Post } from "./Post";
-import Button from "@mui/material/Button";
 
 export const Posts = () => {
-  const { posts, isLoading, errorMessage, setSize, isReachingEnd } =
-    useInfinitePosts();
+  const {
+    posts,
+    errorMessage,
+    setSize,
+    isLoading,
+    isValidating,
+    isReachingEnd,
+  } = useInfinitePosts();
+  const observerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && !isLoading && !isReachingEnd) {
+        setSize((size: number) => size + 1);
+      }
+    },
+    [isLoading, isReachingEnd, setSize]
+  );
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver);
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current);
+      }
+    };
+  }, [handleObserver]);
 
   if (errorMessage) {
     return <p role="alert">{errorMessage}</p>;
@@ -17,32 +48,22 @@ export const Posts = () => {
   return (
     <>
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {isLoading
+        {isLoading && posts.length === 0
           ? Array.from({ length: 15 }).map((_, index) => (
               <PostSkeleton key={index} />
             ))
-          : posts.map((post: any) => (
-              <div key={post.post_id}>
-                <Post
-                  caption={post.caption}
-                  imageUrl={post.image_url}
-                  likes={post.likes}
-                  postId={post.post_id}
-                />
+          : posts.map((post) => (
+              <div key={post.postId}>
+                <Post {...post} />
               </div>
             ))}
       </div>
-      <div className="mt-4">
-        {
-          <Button
-            disabled={isReachingEnd}
-            variant="contained"
-            onClick={() => setSize((size) => size + 1)}
-          >
-            {isReachingEnd ? "No More Cats 😿" : "Load More"}
-          </Button>
-        }
-      </div>
+      <div ref={observerRef} className="h-4 mt-4"></div>
+      {isValidating && (
+        <div className="flex justify-center">
+          <LoadingDots />
+        </div>
+      )}
     </>
   );
 };

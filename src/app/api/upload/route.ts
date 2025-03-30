@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Storage } from "@google-cloud/storage";
 import { sql } from "@vercel/postgres";
 import { randomUUID } from "crypto";
+import sharp from "sharp";
 
 export const maxDuration = 30;
 
@@ -31,9 +32,34 @@ export async function POST(request: Request) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const buffer = await convertToJpeg(Buffer.from(arrayBuffer));
 
-    const validationResponse = await fetch(
+    const validationResult = await validateImage(buffer);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: validationResult.error },
+        { status: 400 }
+      );
+    }
+
+    const publicUrl = await uploadToBucket(buffer, file.type);
+    const blurDataUrl = await getBlurDataUrl(buffer);
+
+    await savePostToDatabase(publicUrl, validationResult.caption, blurDataUrl);
+
+    return NextResponse.json({ fileUrl: publicUrl }, { status: 200 });
+  } catch (error) {
+    console.error("Error handling upload:", error);
+    return NextResponse.json(
+      { message: "Error handling upload: " + (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
+
+async function validateImage(buffer: Buffer) {
+  try {
+    const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/validate`,
       {
         method: "POST",
@@ -41,42 +67,61 @@ export async function POST(request: Request) {
         body: buffer,
       }
     );
-    const validationResult = await validationResponse.json();
-    if (!validationResponse.ok) {
-      return NextResponse.json(
-        { error: validationResult.error || "Image validation failed" },
-        { status: 400 }
-      );
-    }
-
-    const blob = bucket.file(`cats/${randomUUID()}`);
-    const blobStream = blob.createWriteStream({
-      resumable: false,
-      metadata: {
-        contentType: file.type,
-      },
-    });
-
-    await new Promise<void>((resolve, reject) => {
-      blobStream.on("error", (error) => reject(error));
-      blobStream.on("finish", () => resolve());
-      blobStream.end(buffer);
-    });
-
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-    const createdAt = new Date().toISOString();
-    const likes = 0;
-
-    await sql`
-      INSERT INTO Post (created_at, image_url, likes, caption)
-      VALUES (${createdAt}, ${publicUrl}, ${likes}, ${validationResult.caption});
-    `;
-
-    return NextResponse.json({ fileUrl: publicUrl }, { status: 200 });
+    const result = await response.json();
+    return response.ok
+      ? { success: true, caption: result.caption }
+      : { success: false, error: result.error };
   } catch (error) {
-    return NextResponse.json(
-      { message: "Error handling upload: " + (error as Error).message },
-      { status: 500 }
-    );
+    console.error("Error during image validation:", error);
+    throw new Error("Image validation failed");
   }
 }
+
+async function uploadToBucket(buffer: Buffer, contentType: string) {
+  const blob = bucket.file(`cats/${randomUUID()}`);
+  const blobStream = blob.createWriteStream({
+    resumable: false,
+    metadata: { contentType },
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    blobStream.on("error", reject);
+    blobStream.on("finish", resolve);
+    blobStream.end(buffer);
+  });
+
+  return `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+}
+
+async function savePostToDatabase(
+  imageUrl: string,
+  caption: string,
+  blurDataUrl: string
+) {
+  const createdAt = new Date().toISOString();
+  const likes = 0;
+
+  await sql`
+    INSERT INTO Post (created_at, image_url, likes, caption, blur_data_url)
+    VALUES (${createdAt}, ${imageUrl}, ${likes}, ${caption}, ${blurDataUrl});
+  `;
+}
+
+const getBlurDataUrl = async (buffer: Buffer) => {
+  const resizedBuffer = await sharp(buffer)
+    .resize({ width: 10, height: 10, fit: "inside" })
+    .jpeg({ quality: 30 })
+    .toBuffer();
+  const base64 = resizedBuffer.toString("base64");
+  const mimeType = "image/jpeg";
+  const blurDataUrl = `data:${mimeType};base64,${base64}`;
+  return blurDataUrl;
+};
+
+const convertToJpeg = async (buffer: Buffer) => {
+  const processedBuffer = await sharp(buffer)
+    .resize({ width: 1024, withoutEnlargement: true })
+    .jpeg({ quality: 80 })
+    .toBuffer();
+  return processedBuffer;
+};

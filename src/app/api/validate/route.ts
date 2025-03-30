@@ -12,23 +12,25 @@ export async function POST(request: Request) {
     const arrayBuffer = await request.arrayBuffer();
     const dataUrl = await getDataUrlByArrayBuffer(arrayBuffer);
 
-    const isFlagged = await getIsFlagged(dataUrl);
-    if (isFlagged) {
+    if (await getIsFlagged(dataUrl)) {
       return NextResponse.json(
         { error: "Image flagged by automod 👿" },
         { status: 400 }
       );
     }
 
-    const { isCat, caption } = await getCatDetectionResult(dataUrl);
-    if (!isCat) {
+    const detectionResult = await getCatDetectionResult(dataUrl);
+    if (!detectionResult.isCat) {
       return NextResponse.json(
         { error: "That doesn't look like a cat! 🤨" },
         { status: 400 }
       );
     }
 
-    return NextResponse.json({ success: true, caption });
+    return NextResponse.json({
+      success: true,
+      caption: detectionResult.caption,
+    });
   } catch (error: any) {
     console.error("Error during image validation:", error.message);
     return NextResponse.json(

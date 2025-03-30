@@ -12,12 +12,19 @@ export async function POST(request: Request) {
       RETURNING likes
     `;
 
+    if (!rows.length) {
+      return NextResponse.json(
+        { message: "No cats found 🙀", status: 404 },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       status: 200,
-      updatedLikes: rows[0]?.likes ?? 0,
+      updatedLikes: rows[0].likes,
     });
   } catch (error) {
-    console.error("error during like: ", error);
+    console.error("Error during like operation:", error);
     return NextResponse.json(
       { message: "Internal Server Error", error: (error as Error).message },
       { status: 500 }
