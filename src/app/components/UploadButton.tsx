@@ -4,6 +4,7 @@ import { ChangeEvent, useState } from "react";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { useInfinitePosts } from "../hooks/useInfinitePosts";
 import FileUploadRoundedIcon from "@mui/icons-material/FileUploadRounded";
+import imageCompression from "browser-image-compression";
 import toast from "react-hot-toast";
 
 export const UploadButton = () => {
@@ -20,12 +21,15 @@ export const UploadButton = () => {
 
     if (e.target.files.length > 1) {
       toast.error("Please upload one cat at a time 🙀");
+      return;
     }
 
     setIsUploading(true);
 
+    const compressedFile = await imageCompression(file, { maxSizeMB: 5 });
+
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", compressedFile);
 
     try {
       const response = await fetch("/api/upload", {

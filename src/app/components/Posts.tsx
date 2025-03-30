@@ -7,7 +7,7 @@ import { Post } from "./Post";
 import Button from "@mui/material/Button";
 
 export const Posts = () => {
-  const { posts, isLoading, errorMessage, size, setSize, isReachingEnd } =
+  const { posts, isLoading, errorMessage, setSize, isReachingEnd } =
     useInfinitePosts();
 
   if (errorMessage) {
@@ -33,9 +33,15 @@ export const Posts = () => {
             ))}
       </div>
       <div className="mt-4">
-        <Button variant="contained" onClick={() => setSize((size) => size + 1)}>
-          Load More
-        </Button>
+        {
+          <Button
+            disabled={isReachingEnd}
+            variant="contained"
+            onClick={() => setSize((size) => size + 1)}
+          >
+            {isReachingEnd ? "No More Cats 😿" : "Load More"}
+          </Button>
+        }
       </div>
     </>
   );

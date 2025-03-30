@@ -36,7 +36,7 @@ export function useInfinitePosts() {
   );
 
   const posts = data ? data.flat() : [];
-  const isReachingEnd = data && data[data.length - 1]?.length === 0;
+  const isReachingEnd = data && data[data.length - 1]?.length < LIMIT;
 
   return {
     posts,
