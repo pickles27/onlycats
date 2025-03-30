@@ -29,14 +29,15 @@ export const Posts = () => {
 
   useEffect(() => {
     const observer = new IntersectionObserver(handleObserver);
+    const currentRef = observerRef.current;
 
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [handleObserver]);
