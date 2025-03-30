@@ -5,7 +5,6 @@ import { Toaster } from "react-hot-toast";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import "./globals.css";
-import clsx from "clsx";
 
 const inter = Inter({ subsets: ["latin"] });
 
