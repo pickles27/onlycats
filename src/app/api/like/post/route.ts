@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     if (!rows.length) {
       return NextResponse.json(
-        { message: "No cats found 🙀", status: 404 },
+        { message: "This cat doesn't exist 🙀", status: 404 },
         { status: 404 }
       );
     }
