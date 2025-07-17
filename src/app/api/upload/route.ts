@@ -45,7 +45,14 @@ export async function POST(request: Request) {
     const publicUrl = await uploadToBucket(buffer, file.type);
     const blurDataUrl = await getBlurDataUrl(buffer);
 
-    await savePostToDatabase(publicUrl, validationResult.caption, blurDataUrl);
+    const forwarded = request.headers.get("x-forwarded-for");
+
+    await savePostToDatabase(
+      publicUrl,
+      validationResult.caption,
+      blurDataUrl,
+      forwarded || "unknown"
+    );
 
     return NextResponse.json({ fileUrl: publicUrl }, { status: 200 });
   } catch (error) {
@@ -96,14 +103,15 @@ async function uploadToBucket(buffer: Buffer, contentType: string) {
 async function savePostToDatabase(
   imageUrl: string,
   caption: string,
-  blurDataUrl: string
+  blurDataUrl: string,
+  ipAddress: string
 ) {
   const createdAt = new Date().toISOString();
   const likes = 0;
 
   await sql`
-    INSERT INTO Post (created_at, image_url, likes, caption, blur_data_url)
-    VALUES (${createdAt}, ${imageUrl}, ${likes}, ${caption}, ${blurDataUrl});
+    INSERT INTO Post (created_at, image_url, likes, caption, blur_data_url, ip_address)
+    VALUES (${createdAt}, ${imageUrl}, ${likes}, ${caption}, ${blurDataUrl}, ${ipAddress});
   `;
 }
 
