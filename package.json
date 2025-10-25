@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@google-cloud/storage": "7.17.2",
-    "@types/node": "20.0.0",
+    "@types/node": "24.9.1",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "eslint": "9.38.0",
