@@ -43,11 +43,12 @@ export async function POST(request: Request) {
 const captionPrompt = `
   You are a witty cat photo captioner. Look at this image and write a short caption, no more than 140 characters.
   The caption should:
-  - Describe the cat\'s appearance (color, fur, size, etc.)
   - Be based on what the cat is doing in the image
   - Use playful, subtle humor
+  - Can mention the cat\'s appearance (color, fur, size, etc.) but it should not be the main focus of the caption
   - Avoid generic phrases like "curious cat" or "relaxed cat"
   - Do not mention it's a photo
+  - Do not use em dashes or other obvious AI-writing signals.
   Just return the caption as plain text. No explanations. Do not wrap the caption in quotes.
 `;
 
@@ -70,7 +71,7 @@ async function getCatDetectionResult(
             {
               type: "input_image",
               image_url: dataUrl,
-              detail: "low",
+              detail: "high",
             },
           ],
         },
