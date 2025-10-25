@@ -32,9 +32,8 @@ export async function POST(request: Request) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = await convertToJpeg(Buffer.from(arrayBuffer));
 
-    const validationResult = await validateImage(buffer);
+    const validationResult = await validateImage(arrayBuffer);
     if (!validationResult.success) {
       return NextResponse.json(
         { error: validationResult.error },
@@ -42,8 +41,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const publicUrl = await uploadToBucket(buffer, file.type);
-    const blurDataUrl = await getBlurDataUrl(buffer);
+    const publicUrl = await uploadToBucket(arrayBuffer, file.type);
+    const blurDataUrl = await getBlurDataUrl(arrayBuffer);
 
     const forwarded = request.headers.get("x-forwarded-for");
 
@@ -64,14 +63,14 @@ export async function POST(request: Request) {
   }
 }
 
-async function validateImage(buffer: Buffer) {
+async function validateImage(arrayBuffer: ArrayBuffer) {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/validate`,
       {
         method: "POST",
         headers: { "Content-Type": "application/octet-stream" },
-        body: buffer,
+        body: arrayBuffer,
       }
     );
     const result = await response.json();
@@ -84,12 +83,13 @@ async function validateImage(buffer: Buffer) {
   }
 }
 
-async function uploadToBucket(buffer: Buffer, contentType: string) {
+async function uploadToBucket(arrayBuffer: ArrayBuffer, contentType: string) {
   const blob = bucket.file(`cats/${randomUUID()}`);
   const blobStream = blob.createWriteStream({
     resumable: false,
     metadata: { contentType },
   });
+  const buffer = await convertToJpeg(Buffer.from(arrayBuffer));
 
   await new Promise<void>((resolve, reject) => {
     blobStream.on("error", reject);
@@ -115,7 +115,8 @@ async function savePostToDatabase(
   `;
 }
 
-const getBlurDataUrl = async (buffer: Buffer) => {
+const getBlurDataUrl = async (arrayBuffer: ArrayBuffer) => {
+  const buffer = Buffer.from(arrayBuffer);
   const resizedBuffer = await sharp(buffer)
     .resize({ width: 10, height: 10, fit: "inside" })
     .jpeg({ quality: 30 })
