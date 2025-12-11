@@ -1,5 +1,5 @@
 import { UploadButton } from "./UploadButton";
-import catIcon from "public/cat.svg";
+import catIcon from "../../../public/cat.svg";
 import Image from "next/image";
 import Link from "next/link";
 
