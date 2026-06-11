@@ -3,6 +3,8 @@ import { Storage } from "@google-cloud/storage";
 import { sql } from "@vercel/postgres";
 import { randomUUID } from "crypto";
 import sharp from "sharp";
+import { validateImage } from "@/lib/imageValidation";
+import { isUploadRateLimited } from "@/lib/rateLimit";
 
 export const maxDuration = 30;
 
@@ -31,6 +33,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const forwarded = request.headers.get("x-forwarded-for");
+    const ipAddress = forwarded?.split(",")[0]?.trim() || "unknown";
+
+    // Skip when no IP is available (e.g. local dev) — on Vercel,
+    // x-forwarded-for is always set
+    if (ipAddress !== "unknown" && (await isUploadRateLimited(ipAddress))) {
+      return NextResponse.json(
+        { error: "Too many uploads — give the automod a breather 😼" },
+        { status: 429 }
+      );
+    }
+
     const arrayBuffer = await file.arrayBuffer();
 
     const validationResult = await validateImage(arrayBuffer);
@@ -44,13 +58,11 @@ export async function POST(request: Request) {
     const publicUrl = await uploadToBucket(arrayBuffer, file.type);
     const blurDataUrl = await getBlurDataUrl(arrayBuffer);
 
-    const forwarded = request.headers.get("x-forwarded-for");
-
     await savePostToDatabase(
       publicUrl,
       validationResult.caption,
       blurDataUrl,
-      forwarded || "unknown"
+      ipAddress
     );
 
     return NextResponse.json({ fileUrl: publicUrl }, { status: 200 });
@@ -60,26 +72,6 @@ export async function POST(request: Request) {
       { message: "Error handling upload: " + (error as Error).message },
       { status: 500 }
     );
-  }
-}
-
-async function validateImage(arrayBuffer: ArrayBuffer) {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/validate`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/octet-stream" },
-        body: arrayBuffer,
-      }
-    );
-    const result = await response.json();
-    return response.ok
-      ? { success: true, caption: result.caption }
-      : { success: false, error: result.error };
-  } catch (error) {
-    console.error("Error during image validation:", error);
-    throw new Error("Image validation failed");
   }
 }
 

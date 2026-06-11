@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@tailwind utilities;
-
 .animation-delay-200 {
   animation-delay: 0.2s;
 }

@@ -3,14 +3,20 @@ import { NextResponse } from "next/server";
 
 export const revalidate = 0;
 
+const MAX_LIMIT = 50;
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const pageParam = searchParams.get("page");
   const limitParam = searchParams.get("limit");
 
-  const page = pageParam && !isNaN(Number(pageParam)) ? parseInt(pageParam) : 1;
-  const limit =
+  const rawPage =
+    pageParam && !isNaN(Number(pageParam)) ? parseInt(pageParam) : 1;
+  const rawLimit =
     limitParam && !isNaN(Number(limitParam)) ? parseInt(limitParam) : 10;
+
+  const page = Math.max(1, rawPage);
+  const limit = Math.min(MAX_LIMIT, Math.max(1, rawLimit));
   const offset = (page - 1) * limit;
 
   try {

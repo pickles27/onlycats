@@ -1,6 +1,6 @@
 import { Posts } from "./components/Posts";
 
-const Home = async () => {
+const Home = () => {
   return (
     <main className="flex min-h-screen flex-col items-center">
       <Posts />
