@@ -52,6 +52,8 @@ export async function sendErrorAlert(
     });
 
     if (!response.ok) {
+      // Roll back the throttle so the next error retries the send
+      lastSentByKey.delete(context);
       console.error(
         "failed to send error alert email: ",
         response.status,
@@ -60,6 +62,7 @@ export async function sendErrorAlert(
     }
   } catch (alertError) {
     // Alerting must never break the request that triggered it
+    lastSentByKey.delete(context);
     console.error("failed to send error alert email: ", alertError);
   }
 }

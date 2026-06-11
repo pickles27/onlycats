@@ -40,7 +40,7 @@ export const UploadButton = () => {
       if (!response.ok) {
         const data = await response.json().catch(() => null);
         throw new Error(
-          data?.error || data?.message || "Encountered an issue while uploading 🙀"
+          data?.error || "Encountered an issue while uploading 🙀"
         );
       }
 

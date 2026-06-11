@@ -5,6 +5,10 @@ import { sendErrorAlert } from "./errorAlert";
 
 const openai = new OpenAI();
 
+// Validation failures whose messages are safe to show to end users,
+// unlike arbitrary internal errors
+export class ImageValidationError extends Error {}
+
 // Vision pricing scales with image dimensions, so downscale before sending
 // to OpenAI. The stored image is resized separately in the upload route.
 const AI_IMAGE_WIDTH = 768;
@@ -146,7 +150,7 @@ async function getCatDetectionResult(
   } catch (error) {
     console.error("error during image classification: ", error);
     after(() => sendErrorAlert("cat detection", error));
-    throw new Error("Encountered an issue during cat detection 😾");
+    throw new ImageValidationError("Encountered an issue during cat detection 😾");
   }
 }
 
@@ -169,7 +173,7 @@ async function getIsFlagged(dataUrl: string): Promise<boolean> {
   } catch (error) {
     console.error("error during image moderation: ", error);
     after(() => sendErrorAlert("image moderation", error));
-    throw new Error("Encountered an issue during image moderation 😾");
+    throw new ImageValidationError("Encountered an issue during image moderation 😾");
   }
 }
 

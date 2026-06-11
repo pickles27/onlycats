@@ -1,4 +1,6 @@
 import { sql } from "@vercel/postgres";
+import { after } from "next/server";
+import { sendErrorAlert } from "./errorAlert";
 
 const WINDOW_MS = 60 * 60 * 1000;
 const MAX_UPLOADS_PER_WINDOW = 30;
@@ -51,22 +53,34 @@ export async function isUploadRateLimited(
     return false;
   }
 
-  await ensureTable();
+  try {
+    await ensureTable();
 
-  const cleanupCutoff = new Date(Date.now() - CLEANUP_AFTER_MS).toISOString();
-  await sql`DELETE FROM upload_attempt WHERE created_at < ${cleanupCutoff}`;
+    const cleanupCutoff = new Date(
+      Date.now() - CLEANUP_AFTER_MS
+    ).toISOString();
+    await sql`DELETE FROM upload_attempt WHERE created_at < ${cleanupCutoff}`;
 
-  const windowStart = new Date(Date.now() - WINDOW_MS).toISOString();
-  const { rows } = await sql`
-    SELECT COUNT(*)::int AS attempts
-    FROM upload_attempt
-    WHERE ip_address = ${ipAddress} AND created_at > ${windowStart}
-  `;
+    // Count and insert in one statement so concurrent requests can't all
+    // pass the check before any of their inserts land
+    const windowStart = new Date(Date.now() - WINDOW_MS).toISOString();
+    const { rowCount } = await sql`
+      WITH recent AS (
+        SELECT COUNT(*)::int AS attempts
+        FROM upload_attempt
+        WHERE ip_address = ${ipAddress} AND created_at > ${windowStart}
+      )
+      INSERT INTO upload_attempt (ip_address)
+      SELECT ${ipAddress} FROM recent
+      WHERE attempts < ${MAX_UPLOADS_PER_WINDOW}
+      RETURNING 1
+    `;
 
-  if (rows[0].attempts >= MAX_UPLOADS_PER_WINDOW) {
-    return true;
+    return rowCount === 0;
+  } catch (error) {
+    // Fail open: a rate-limiter outage shouldn't take down uploads
+    console.error("rate limit check failed, allowing upload: ", error);
+    after(() => sendErrorAlert("rate limiter", error));
+    return false;
   }
-
-  await sql`INSERT INTO upload_attempt (ip_address) VALUES (${ipAddress})`;
-  return false;
 }

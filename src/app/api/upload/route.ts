@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { Storage } from "@google-cloud/storage";
 import { sql } from "@vercel/postgres";
 import { randomUUID } from "crypto";
 import sharp from "sharp";
-import { validateImage } from "@/lib/imageValidation";
+import { validateImage, ImageValidationError } from "@/lib/imageValidation";
 import { isUploadRateLimited } from "@/lib/rateLimit";
+import { sendErrorAlert } from "@/lib/errorAlert";
 
 export const maxDuration = 30;
 
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
 
     if (!file || !file.name) {
       return NextResponse.json(
-        { message: "No file uploaded." },
+        { error: "No file uploaded 😿" },
         { status: 400 }
       );
     }
@@ -55,8 +56,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const publicUrl = await uploadToBucket(arrayBuffer, file.type);
-    const blurDataUrl = await getBlurDataUrl(arrayBuffer);
+    const [publicUrl, blurDataUrl] = await Promise.all([
+      uploadToBucket(arrayBuffer),
+      getBlurDataUrl(arrayBuffer),
+    ]);
 
     await savePostToDatabase(
       publicUrl,
@@ -68,18 +71,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ fileUrl: publicUrl }, { status: 200 });
   } catch (error) {
     console.error("Error handling upload:", error);
+
+    if (error instanceof ImageValidationError) {
+      // Already alerted inside imageValidation; message is user-safe
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    after(() => sendErrorAlert("upload handling", error));
     return NextResponse.json(
-      { message: "Error handling upload: " + (error as Error).message },
+      { error: "Something went wrong while uploading 😿" },
       { status: 500 }
     );
   }
 }
 
-async function uploadToBucket(arrayBuffer: ArrayBuffer, contentType: string) {
+async function uploadToBucket(arrayBuffer: ArrayBuffer) {
   const blob = bucket.file(`cats/${randomUUID()}`);
   const blobStream = blob.createWriteStream({
     resumable: false,
-    metadata: { contentType },
+    // convertToJpeg always re-encodes, regardless of the uploaded type
+    metadata: { contentType: "image/jpeg" },
   });
   const buffer = await convertToJpeg(Buffer.from(arrayBuffer));
 

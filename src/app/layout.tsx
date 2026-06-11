@@ -9,9 +9,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000"
-  ),
+  metadataBase: URL.canParse(process.env.NEXT_PUBLIC_API_URL ?? "")
+    ? new URL(process.env.NEXT_PUBLIC_API_URL!)
+    : new URL("http://localhost:3000"),
   title: "OnlyCats",
   description: "Only cats allowed",
 };
