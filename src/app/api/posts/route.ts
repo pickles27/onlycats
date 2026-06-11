@@ -3,14 +3,20 @@ import { NextResponse } from "next/server";
 
 export const revalidate = 0;
 
+const MAX_LIMIT = 50;
+
+function parsePositiveInt(value: string | null, fallback: number): number {
+  const parsed = parseInt(value ?? "", 10);
+  return Number.isNaN(parsed) ? fallback : Math.max(1, parsed);
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const pageParam = searchParams.get("page");
   const limitParam = searchParams.get("limit");
 
-  const page = pageParam && !isNaN(Number(pageParam)) ? parseInt(pageParam) : 1;
-  const limit =
-    limitParam && !isNaN(Number(limitParam)) ? parseInt(limitParam) : 10;
+  const page = parsePositiveInt(pageParam, 1);
+  const limit = Math.min(MAX_LIMIT, parsePositiveInt(limitParam, 10));
   const offset = (page - 1) * limit;
 
   try {

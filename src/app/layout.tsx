@@ -9,6 +9,9 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: URL.canParse(process.env.NEXT_PUBLIC_API_URL ?? "")
+    ? new URL(process.env.NEXT_PUBLIC_API_URL!)
+    : new URL("http://localhost:3000"),
   title: "OnlyCats",
   description: "Only cats allowed",
 };
@@ -25,8 +28,8 @@ export default function RootLayout({
         <div className="px-4 sm:px-12 lg:px-16 pt-16 pb-10">{children}</div>
         <Toaster />
         <Footer />
+        <Analytics />
       </body>
-      <Analytics />
     </html>
   );
 }

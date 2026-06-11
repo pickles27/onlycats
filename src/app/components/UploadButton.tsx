@@ -26,19 +26,22 @@ export const UploadButton = () => {
 
     setIsUploading(true);
 
-    const compressedFile = await imageCompression(file, { maxSizeMB: 5 });
-
-    const formData = new FormData();
-    formData.append("image", compressedFile);
-
     try {
+      const compressedFile = await imageCompression(file, { maxSizeMB: 5 });
+
+      const formData = new FormData();
+      formData.append("image", compressedFile);
+
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error("Encountered an issue while uploading 🙀");
+        const data = await response.json().catch(() => null);
+        throw new Error(
+          data?.error || "Encountered an issue while uploading 🙀"
+        );
       }
 
       toast.success("Cat uploaded successfully! 😸");
@@ -55,7 +58,7 @@ export const UploadButton = () => {
     <form>
       <label
         htmlFor="file-upload"
-        className="sm:w-28 flex justify-center items-center gap-1 bg-sky-600 transition delay-75 hover:bg-sky-500 text-white font-bold rounded-full sm:rounded-lg py-2 px-2 sm:px-3 cursor-pointer drop-shadow-md"
+        className="sm:w-28 flex justify-center items-center gap-1 bg-sky-600 transition delay-75 hover:bg-sky-500 text-white font-bold rounded-full sm:rounded-lg py-2 px-2 sm:px-3 cursor-pointer shadow-md"
       >
         {isUploading ? (
           <LoadingSpinner />

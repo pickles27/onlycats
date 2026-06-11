@@ -1,8 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { Storage } from "@google-cloud/storage";
 import { sql } from "@vercel/postgres";
 import { randomUUID } from "crypto";
 import sharp from "sharp";
+import { validateImage, ImageValidationError } from "@/lib/imageValidation";
+import { isUploadRateLimited } from "@/lib/rateLimit";
+import { sendErrorAlert } from "@/lib/errorAlert";
 
 export const maxDuration = 30;
 
@@ -26,8 +29,20 @@ export async function POST(request: Request) {
 
     if (!file || !file.name) {
       return NextResponse.json(
-        { message: "No file uploaded." },
+        { error: "No file uploaded 😿" },
         { status: 400 }
+      );
+    }
+
+    const forwarded = request.headers.get("x-forwarded-for");
+    const ipAddress = forwarded?.split(",")[0]?.trim() || "unknown";
+
+    // Skip when no IP is available (e.g. local dev) — on Vercel,
+    // x-forwarded-for is always set
+    if (ipAddress !== "unknown" && (await isUploadRateLimited(ipAddress))) {
+      return NextResponse.json(
+        { error: "Too many uploads — give the automod a breather 😼" },
+        { status: 429 }
       );
     }
 
@@ -41,53 +56,41 @@ export async function POST(request: Request) {
       );
     }
 
-    const publicUrl = await uploadToBucket(arrayBuffer, file.type);
-    const blurDataUrl = await getBlurDataUrl(arrayBuffer);
-
-    const forwarded = request.headers.get("x-forwarded-for");
+    const [publicUrl, blurDataUrl] = await Promise.all([
+      uploadToBucket(arrayBuffer),
+      getBlurDataUrl(arrayBuffer),
+    ]);
 
     await savePostToDatabase(
       publicUrl,
       validationResult.caption,
       blurDataUrl,
-      forwarded || "unknown"
+      ipAddress
     );
 
     return NextResponse.json({ fileUrl: publicUrl }, { status: 200 });
   } catch (error) {
     console.error("Error handling upload:", error);
+
+    if (error instanceof ImageValidationError) {
+      // Already alerted inside imageValidation; message is user-safe
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    after(() => sendErrorAlert("upload handling", error));
     return NextResponse.json(
-      { message: "Error handling upload: " + (error as Error).message },
+      { error: "Something went wrong while uploading 😿" },
       { status: 500 }
     );
   }
 }
 
-async function validateImage(arrayBuffer: ArrayBuffer) {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/validate`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/octet-stream" },
-        body: arrayBuffer,
-      }
-    );
-    const result = await response.json();
-    return response.ok
-      ? { success: true, caption: result.caption }
-      : { success: false, error: result.error };
-  } catch (error) {
-    console.error("Error during image validation:", error);
-    throw new Error("Image validation failed");
-  }
-}
-
-async function uploadToBucket(arrayBuffer: ArrayBuffer, contentType: string) {
+async function uploadToBucket(arrayBuffer: ArrayBuffer) {
   const blob = bucket.file(`cats/${randomUUID()}`);
   const blobStream = blob.createWriteStream({
     resumable: false,
-    metadata: { contentType },
+    // convertToJpeg always re-encodes, regardless of the uploaded type
+    metadata: { contentType: "image/jpeg" },
   });
   const buffer = await convertToJpeg(Buffer.from(arrayBuffer));
 
