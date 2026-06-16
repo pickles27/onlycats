@@ -18,7 +18,7 @@
     "@mui/icons-material": "7.3.4",
     "@mui/material": "7.3.4",
     "@number-flow/react": "0.5.10",
-    "@tailwindcss/postcss": "4.1.16",
+    "@tailwindcss/postcss": "4.1.18",
     "@vercel/analytics": "1.6.1",
     "@vercel/postgres": "0.10.0",
     "browser-image-compression": "2.0.2",
